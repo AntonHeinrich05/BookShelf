@@ -49,7 +49,7 @@ export default function StatsPage() {
           <Segmented value={metric} onChange={setMetric} options={[{ value: "books", label: "Bücher" }, { value: "pages", label: "Seiten" }]} testId="metric-toggle" />
         </div>
         <div className="h-44">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minHeight={176}>
             <BarChart data={chart} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
               <XAxis dataKey="name" tick={{ fill: "var(--c-fg3)", fontSize: 11 }} axisLine={false} tickLine={false} interval={0} />
               <Tooltip cursor={{ fill: "var(--c-surface2)" }} contentStyle={{ background: "var(--c-surface2)", border: "none", borderRadius: 12, color: "var(--c-fg)", fontSize: 12 }} itemStyle={{ color: "var(--c-fg)" }} labelStyle={{ color: "var(--c-fg2)" }} />
