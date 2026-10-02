@@ -1,0 +1,117 @@
+{
+  "project_name": "BookShelf",
+  "app_type": "Mobile Web App (PWA)",
+  "typography": {
+    "headings": "Manrope, sans-serif",
+    "body": "Figtree, sans-serif",
+    "hierarchy": {
+      "h1": "text-3xl sm:text-4xl font-bold tracking-tight text-white",
+      "h2": "text-2xl font-semibold tracking-tight text-white",
+      "h3": "text-lg font-medium tracking-tight text-white/90",
+      "body": "text-base text-[#EBEBF599] leading-relaxed",
+      "small_caps": "text-xs font-bold uppercase tracking-[0.2em] text-[#EBEBF54D]"
+    },
+    "notes": "Ensure clean, iOS-like readability. German language has longer compound words, so ensure text truncation or wrapping is handled gracefully in list views (e.g. using line-clamp)."
+  },
+  "colors": {
+    "theme": "Dark mode by default, support for light mode via toggle. High contrast iOS style.",
+    "dark": {
+      "background": "#000000",
+      "surface": "#1C1C1E",
+      "surface_elevated": "#2C2C2E",
+      "text_primary": "#FFFFFF",
+      "text_secondary": "rgba(235, 235, 245, 0.6)",
+      "text_tertiary": "rgba(235, 235, 245, 0.3)",
+      "border": "#38383A",
+      "accent": "#FFFFFF",
+      "accent_secondary": "#0A84FF",
+      "destructive": "#FF453A",
+      "success": "#32D74B"
+    },
+    "light": {
+      "background": "#F2F2F7",
+      "surface": "#FFFFFF",
+      "surface_elevated": "#FFFFFF",
+      "text_primary": "#000000",
+      "text_secondary": "rgba(60, 60, 67, 0.6)",
+      "text_tertiary": "rgba(60, 60, 67, 0.3)",
+      "border": "#C6C6C8",
+      "accent": "#000000",
+      "accent_secondary": "#007AFF",
+      "destructive": "#FF3B30",
+      "success": "#34C759"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Use backdrop-blur-xl with bg-black/70 (or bg-white/70 for light mode) for sticky headers and the floating bottom tab bar. Never use pure transparent backgrounds.",
+    "border_radius": "Use rounded-2xl for main grouped list cards, rounded-xl for inner elements or smaller cards. Pill shapes (rounded-full) for primary CTAs like 'Zur Bibliothek hinzufügen'.",
+    "shadows": "Minimal shadows in dark mode (rely on 1px borders and distinct surface colors for separation). In light mode, use shadow-sm for cards."
+  },
+  "component_guidelines": {
+    "grouped_lists": "Classic iOS Settings style. Container with bg-[#1c1c1e] and rounded-2xl. Items separated by border-b border-[#38383a]. Left side: icon inside a rounded-md colored square (e.g., bg-blue-500, bg-indigo-500). Middle: Title. Right side: Count or value (text-secondary) and chevron-right.",
+    "bottom_tab_bar": "Floating pill at bottom. rounded-full, backdrop-blur-xl bg-black/70, border border-white/10. Contains 3 main tabs (Bücher, Entdecken, Statistiken) and a search icon/button.",
+    "bottom_sheet_form": "For 'Buch hinzufügen'. Use a dialog/drawer that slides up. Large form with grouped sections (BUCHDETAILS, LESESTATUS, KATEGORIEN). Full-width pill button 'Zur Bibliothek hinzufügen' sticky at the bottom.",
+    "calendar_view": "Monthly grid highlighting reading spans. Days with reading sessions show a tiny book cover or highlighted background span. Clean, subtle, non-intrusive.",
+    "book_card": "Vertical cover image (rounded-md aspect-[2/3]), title below (1-2 lines truncated text-sm font-semibold), author (text-xs text-secondary), and a small badge 'Teil X' if part of a series.",
+    "badges": "Small pill badges for series info or formats. e.g., bg-white/10 text-white text-[10px] px-2 py-0.5 rounded-full."
+  },
+  "grids_and_layouts": {
+    "mobile_first": "Design specifically for mobile viewport (w-full max-w-md mx-auto or full width on phone) but allow scaling for tablet/desktop by keeping content centered.",
+    "spacing": "Generous spacing. p-4 or p-6 for main padding. gap-6 between major sections. Use pb-28 to clear the floating tab bar.",
+    "forms": "iOS style grouped form fields for 'Buch hinzufügen'. Label on left, input/value on right. Use native-looking inputs or customized shadcn Select/Input."
+  },
+  "motion": {
+    "transitions": "Smooth transitions for state changes (opacity 0.2s ease, transform 0.2s ease). Do not use 'transition: all'.",
+    "interactions": "Buttons and list items scale down slightly on active: active:scale-[0.98] or active:opacity-70.",
+    "sheets": "Slide up from bottom for additive actions, slide from right for drill-down navigation."
+  },
+  "accessibility": {
+    "contrast": "Ensure text contrast meets 4.5:1. Avoid dark text on dark backgrounds.",
+    "touch_targets": "Minimum 44x44px for all interactive elements (buttons, list rows, tabs)."
+  },
+  "image_urls": {
+    "book_covers": [
+      {
+        "url": "https://images.unsplash.com/photo-1519764340700-3db40311f21e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzJ8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwYm9vayUyMGNvdmVyfGVufDB8fHx8MTc5MDk3MjU5Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Minimalist white book cover, use as placeholder for minimal books."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1711185892711-cdf27b3b8b54?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MTN8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwYm9vayUyMGNvdmVyfGVufDB8fHx8MTc5MDk3MjU5Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Fantasy book cover, use for fiction placeholders."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1526049997133-25caee4c5796?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzJ8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwYm9vayUyMGNvdmVyfGVufDB8fHx8MTc5MDk3MjU5Nnww&ixlib=rb-4.1.0&q=85",
+        "description": "Yellow minimalist book cover."
+      }
+    ],
+    "avatars": [
+      {
+        "url": "https://images.unsplash.com/photo-1740252117044-2af197eea287?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1ODh8MHwxfHNlYXJjaHwxfHx1c2VyJTIwcHJvZmlsZSUyMGF2YXRhcnxlbnwwfHx8fDE3OTA5NzI1OTZ8MA&ixlib=rb-4.1.0&q=85",
+        "description": "User profile avatar for settings screen."
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Use pure HTML/Tailwind for the iOS grouped list layouts, as Shadcn cards might be too rigid to look exactly like iOS Settings.",
+    "For the floating bottom tab bar, use position: fixed, bottom: 4 or 6, left/right centered, rounded-full, backdrop-blur-xl.",
+    "Implement the 'Buch hinzufügen' view as a comprehensive form with grouped sections (BUCHDETAILS, LESESTATUS, BUCHFORMAT, EIGENTUMSSTATUS, KATEGORIEN, SAMMLUNGEN, SERIE, ORTE).",
+    "Use Lucide-react for iOS-like simple stroke icons.",
+    "Ensure German translations for all UI texts exactly as requested (Bibliothek, Entdecken, Statistiken, Bücher, Sammlungen, Formate, Wunschliste, Zu Lesen, etc.).",
+    "Use a pure black (`bg-black` mapping to `#000000`) background for the body in dark mode to match iOS OLED aesthetic."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. Make creative, distinctive frontends that surprise and delight.",
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition (e.g., transition: all). Add transitions for specific interactive elements.",
+    "You MUST NOT center align the app container. Do not add `.App { text-align: center; }`.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style.",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "All interactive and key informational elements MUST include a data-testid attribute.",
+    "CRITICAL: DO NOT use complete transparent background in header, overlays, any surface that has content under it.",
+    "Use `sonner` for toasts."
+  ]
+}
