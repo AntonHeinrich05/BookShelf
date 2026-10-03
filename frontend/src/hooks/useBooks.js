@@ -10,7 +10,7 @@ export const useTaxonomy = (kind) => useQuery({ queryKey: ["taxonomy", kind], qu
 export const useAuthors = () => useQuery({ queryKey: ["authors"], queryFn: get("/authors") });
 export const useStats = (year) => useQuery({ queryKey: ["stats", year], queryFn: get("/stats", year ? { year } : {}) });
 export const useSearch = (q, lang) =>
-  useQuery({ queryKey: ["search", q, lang], queryFn: get("/search", { q, lang: lang || undefined }), enabled: q.trim().length > 1, staleTime: 5 * 60_000 });
+  useQuery({ queryKey: ["search", q.trim().toLowerCase(), lang], queryFn: get("/search", { q: q.trim(), lang: lang || undefined }), enabled: q.trim().length > 1, staleTime: 24 * 60 * 60_000, placeholderData: (prev) => prev });
 
 const useInvalidate = () => {
   const qc = useQueryClient();

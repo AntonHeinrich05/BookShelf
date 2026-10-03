@@ -13,7 +13,7 @@ export const FormRow = ({ label, children, testId, className }) => (
 );
 
 export const TextInput = ({ className, ...props }) => (
-  <input {...props} className={cn("w-full bg-transparent text-right text-[16px] text-fg outline-none placeholder:text-fg3", className)} />
+  <input {...props} onFocus={(e) => { e.target.select(); props.onFocus?.(e); }} className={cn("w-full bg-transparent text-right text-[16px] text-fg outline-none placeholder:text-fg3", className)} />
 );
 
 export const NativeSelect = ({ value, onChange, options, placeholder, testId }) => (

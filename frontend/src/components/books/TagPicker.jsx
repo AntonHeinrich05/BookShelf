@@ -13,6 +13,7 @@ export function TagPicker({ values = [], onChange, suggestions = [], placeholder
 
   return (
     <div className="px-4 py-3" data-testid={testId}>
+      {values.length === 0 && filtered.length > 0 && !input && <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-fg3">Vorhandene antippen oder neu eingeben</p>}
       {values.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {values.map((v) => (

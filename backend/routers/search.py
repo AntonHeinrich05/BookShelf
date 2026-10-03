@@ -1,11 +1,14 @@
+import asyncio
 import os
 import re
+from datetime import datetime, timezone
 from typing import Optional
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from auth_utils import get_current_user
+from database import db
 from models import User
 
 router = APIRouter(prefix="/search", tags=["search"])
@@ -112,8 +115,17 @@ async def search_books(
     start: int = 0,
     user: User = Depends(get_current_user),
 ):
+    cache_key = {"q": q.strip().lower(), "lang": lang or "", "start": start}
+    cached = await db.search_cache.find_one(cache_key, {"_id": 0, "result": 1})
+    if cached:
+        return cached["result"]
     async with httpx.AsyncClient(timeout=15) as client:
-        result = await search_google(client, q, lang, start)
-        if result is None:
-            result = await search_open_library(client, q, lang, start)
+        google, openlib = await asyncio.gather(
+            search_google(client, q, lang, start), search_open_library(client, q, lang, start), return_exceptions=True
+        )
+    result = google if isinstance(google, dict) else (openlib if isinstance(openlib, dict) else None)
+    if result is None:
+        raise HTTPException(status_code=502, detail="Büchersuche derzeit nicht verfügbar")
+    if result["items"]:
+        await db.search_cache.update_one(cache_key, {"$set": {"result": result, "created_at": datetime.now(timezone.utc)}}, upsert=True)
     return result

@@ -71,7 +71,7 @@ export function ProgressCard({ book, onPatch }) {
       </div>
       <input type="range" min={0} max={book.page_count} value={page} onChange={(e) => setPage(Number(e.target.value))} className="mt-4 w-full" data-testid="progress-slider" />
       <div className="mt-3 flex items-center gap-2">
-        <input type="number" min={0} max={book.page_count} value={page} onChange={(e) => setPage(Math.min(book.page_count, Math.max(0, Number(e.target.value))))} className="w-24 rounded-xl bg-surface2 px-3 py-2 text-[16px] tabular-nums outline-none" data-testid="progress-input" />
+        <input type="number" min={0} max={book.page_count} value={page} onFocus={(e) => e.target.select()} onChange={(e) => setPage(Math.min(book.page_count, Math.max(0, Number(e.target.value))))} className="w-24 rounded-xl bg-surface2 px-3 py-2 text-[16px] tabular-nums outline-none" data-testid="progress-input" />
         <button type="button" disabled={!dirty} onClick={() => onPatch({ current_page: page, progress_type: "pages", ...(book.status !== "reading" && page < book.page_count ? { status: "reading" } : {}) })} className="rounded-full bg-fg px-4 py-2 text-sm font-semibold text-canvas transition-opacity disabled:opacity-40" data-testid="progress-save">
           Speichern
         </button>

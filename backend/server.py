@@ -1,15 +1,40 @@
+import asyncio
 import logging
 import os
 
+import httpx
 from fastapi import APIRouter, FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from database import client
+from database import client, db
 from routers import auth, books, search, stats, taxonomy
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger("bookshelf")
 
 app = FastAPI(title="BookShelf API")
+
+
+async def keep_alive():
+    # Pings own public URL every 10 min so free Render instances never spin down.
+    url = os.environ.get("KEEP_ALIVE_URL", "").rstrip("/")
+    if not url:
+        return
+    async with httpx.AsyncClient(timeout=20) as http:
+        while True:
+            await asyncio.sleep(600)
+            try:
+                await http.get(f"{url}/api/health")
+            except Exception as exc:
+                logger.warning("keep-alive ping failed: %s", exc)
+
+
+@app.on_event("startup")
+async def on_startup():
+    await db.search_cache.create_index("created_at", expireAfterSeconds=7 * 24 * 3600)
+    await db.books.create_index([("user_id", 1), ("status", 1)])
+    await db.user_sessions.create_index("session_token")
+    asyncio.create_task(keep_alive())
 
 api_router = APIRouter(prefix="/api")
 

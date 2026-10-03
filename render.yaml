@@ -13,6 +13,8 @@ services:
         value: bookshelf
       - key: CORS_ORIGINS
         sync: false
+      - key: KEEP_ALIVE_URL
+        sync: false
       - key: PYTHON_VERSION
         value: 3.11.9
 

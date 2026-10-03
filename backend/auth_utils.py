@@ -7,7 +7,7 @@ from fastapi import HTTPException, Request, Response
 from database import db
 from models import User
 
-SESSION_DAYS = 7
+SESSION_DAYS = 365
 COOKIE_NAME = "session_token"
 
 
@@ -75,6 +75,11 @@ async def get_current_user(request: Request) -> User:
         expires_at = expires_at.replace(tzinfo=timezone.utc)
     if expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Sitzung abgelaufen")
+    # sliding expiry: keep active users logged in indefinitely
+    if expires_at - datetime.now(timezone.utc) < timedelta(days=SESSION_DAYS - 7):
+        await db.user_sessions.update_one(
+            {"session_token": token}, {"$set": {"expires_at": datetime.now(timezone.utc) + timedelta(days=SESSION_DAYS)}}
+        )
     user_doc = await db.users.find_one({"user_id": session["user_id"]}, {"_id": 0})
     if not user_doc:
         raise HTTPException(status_code=401, detail="Benutzer nicht gefunden")

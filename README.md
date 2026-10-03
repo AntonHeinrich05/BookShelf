@@ -47,6 +47,15 @@ cd frontend && yarn && yarn start
 ```
 `backend/.env`: `MONGO_URL`, `DB_NAME`, `CORS_ORIGINS` · `frontend/.env`: `REACT_APP_BACKEND_URL`
 
+## Render: Nicht einschlafen lassen (wichtig)
+Free-Web-Services auf Render schlafen nach 15 Min. ohne Traffic ein. Zwei Maßnahmen sind eingebaut/empfohlen:
+1. **Backend-Selbstping**: Im Backend die Env-Variable `KEEP_ALIVE_URL` = eigene Backend-URL setzen (z. B. `https://bookshelf-api.onrender.com`). Das Backend ruft dann alle 10 Min. `/api/health` auf und bleibt wach.
+2. **Externer Ping als Backup** (kostenlos): bei [UptimeRobot](https://uptimerobot.com) oder [cron-job.org](https://cron-job.org) einen Monitor auf `https://bookshelf-api.onrender.com/api/health` alle 5 Min. anlegen – weckt den Service auch nach einem Neustart sofort wieder.
+3. Das **Frontend als „Static Site“** anlegen (statt Web Service): kostenlos, unbegrenzt, schläft nie. Build Command `yarn install && yarn build`, Publish Directory `build`, unter „Redirects/Rewrites“ eine Rewrite-Regel `/*` → `/index.html`. Env-Variablen wie oben.
+   Hintergrund: Render Free gibt 750 Instanz-Stunden/Monat – ein dauerhaft wacher Web Service braucht ~744 h. Zwei wache Web Services würden das Limit sprengen, Static Sites zählen nicht.
+
+Alternativ schläft ein Service im **Starter-Plan (7 $/Monat)** garantiert nie.
+
 ## Deployment auf Render (zwei Web Services, ohne Blueprint)
 
 Vorher: Repo auf GitHub pushen, MongoDB-Atlas-Cluster anlegen (Free Tier), unter *Database → Connect → Drivers* den Connection-String kopieren (Form: `mongodb+srv://USER:PASSWORT@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority`) und unter *Network Access* `0.0.0.0/0` erlauben.
@@ -64,6 +73,7 @@ Environment Variables (Tab „Environment“):
 - `MONGO_URL` = dein Atlas-Connection-String  ← **hier kommt der Atlas-String rein**
 - `DB_NAME` = `bookshelf`
 - `CORS_ORIGINS` = URL des Frontends, z. B. `https://bookshelf-web.onrender.com` (ohne Slash am Ende)
+- `KEEP_ALIVE_URL` = eigene Backend-URL, z. B. `https://bookshelf-api.onrender.com` (verhindert Einschlafen)
 - `PYTHON_VERSION` = `3.11.9`
 
 ### 2. Frontend – „New → Web Service“

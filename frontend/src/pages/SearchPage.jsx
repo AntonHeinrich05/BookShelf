@@ -23,7 +23,7 @@ export default function SearchPage() {
   const inLibrary = new Set(library.map((b) => b.google_id).filter(Boolean));
 
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(q), 400);
+    const t = setTimeout(() => setDebounced(q), 250);
     return () => clearTimeout(t);
   }, [q]);
 

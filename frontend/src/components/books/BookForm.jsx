@@ -40,7 +40,14 @@ export function BookForm({ open, onOpenChange, initial, bookId, onSaved }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const set = (key, value) => setForm((f) => ({ ...f, [key]: value }));
+  const set = (key, value) =>
+    setForm((f) => {
+      const next = { ...f, [key]: value };
+      // Dates drive the status: end date → finished, start date → reading
+      if (key === "end_date" && value) next.status = "finished";
+      if (key === "start_date" && value && !next.end_date && ["wishlist", "to_read"].includes(next.status)) next.status = "reading";
+      return next;
+    });
   const names = (kind) => overview?.[kind]?.map((x) => x.name) || [];
 
   const submit = async (e) => {

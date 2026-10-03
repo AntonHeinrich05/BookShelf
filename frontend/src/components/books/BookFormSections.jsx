@@ -1,8 +1,9 @@
 import { Switch } from "@/components/ui/switch";
-import { FORMATS, OWNERSHIP, STATUSES, TAXONOMY } from "@/lib/constants";
+import { decimal, digits, FORMATS, OWNERSHIP, STATUSES, TAXONOMY } from "@/lib/constants";
 import { Cover } from "./Cover";
 import { Stars } from "./Bits";
 import { TagPicker } from "./TagPicker";
+import { SeriesPicker } from "./SeriesPicker";
 import { FormGroup, FormRow, NativeSelect, SectionLabel, Segmented, TextInput } from "@/components/ios/Form";
 
 export function DetailsSection({ form, set }) {
@@ -17,7 +18,7 @@ export function DetailsSection({ form, set }) {
         </div>
       </div>
       <FormGroup>
-        <FormRow label="Jahr"><TextInput inputMode="numeric" value={form.published_year} onChange={(e) => set("published_year", e.target.value)} placeholder="–" data-testid="form-year" /></FormRow>
+        <FormRow label="Jahr"><TextInput inputMode="numeric" value={form.published_year} onChange={(e) => set("published_year", digits(e.target.value))} placeholder="–" data-testid="form-year" /></FormRow>
         <FormRow label="Verlag"><TextInput value={form.publisher} onChange={(e) => set("publisher", e.target.value)} placeholder="–" data-testid="form-publisher" /></FormRow>
         <FormRow label="ISBN"><TextInput value={form.isbn} onChange={(e) => set("isbn", e.target.value)} placeholder="–" data-testid="form-isbn" /></FormRow>
         <FormRow label="Cover-URL"><TextInput value={form.cover_url} onChange={(e) => set("cover_url", e.target.value)} placeholder="https://…" data-testid="form-cover" /></FormRow>
@@ -45,11 +46,11 @@ export function FormatSection({ form, set }) {
       <FormGroup>
         <FormRow label="Format"><NativeSelect value={form.format} onChange={(v) => set("format", v)} options={FORMATS} placeholder="–" testId="form-format" /></FormRow>
         <FormRow label="Fortschrittstyp"><Segmented value={form.progress_type} onChange={(v) => set("progress_type", v)} options={[{ value: "pages", label: "Seiten" }, { value: "percent", label: "%" }]} testId="form-progress-type" /></FormRow>
-        <FormRow label="Seitenanzahl"><TextInput inputMode="numeric" value={form.page_count} onChange={(e) => set("page_count", e.target.value)} placeholder="–" data-testid="form-pages" /></FormRow>
+        <FormRow label="Seitenanzahl"><TextInput inputMode="numeric" value={form.page_count} onChange={(e) => set("page_count", digits(e.target.value))} placeholder="–" data-testid="form-pages" /></FormRow>
         {form.progress_type === "pages" ? (
-          <FormRow label="Gelesene Seiten"><TextInput inputMode="numeric" value={form.current_page} onChange={(e) => set("current_page", e.target.value)} data-testid="form-current-page" /></FormRow>
+          <FormRow label="Gelesene Seiten"><TextInput inputMode="numeric" value={form.current_page} onChange={(e) => set("current_page", digits(e.target.value))} placeholder="0" data-testid="form-current-page" /></FormRow>
         ) : (
-          <FormRow label="Fortschritt %"><TextInput inputMode="numeric" value={form.progress_percent} onChange={(e) => set("progress_percent", e.target.value)} data-testid="form-progress-percent" /></FormRow>
+          <FormRow label="Fortschritt %"><TextInput inputMode="numeric" value={form.progress_percent} onChange={(e) => set("progress_percent", digits(e.target.value))} placeholder="0" data-testid="form-progress-percent" /></FormRow>
         )}
       </FormGroup>
     </>
@@ -85,11 +86,8 @@ export function SeriesSection({ form, set, suggestions }) {
     <>
       <SectionLabel>Serie</SectionLabel>
       <FormGroup>
-        <FormRow label="Reihe">
-          <TextInput list="series-suggestions" value={form.series_name} onChange={(e) => set("series_name", e.target.value)} placeholder="z. B. Dunbridge Academy" data-testid="form-series" />
-          <datalist id="series-suggestions">{suggestions.map((s) => <option key={s} value={s} />)}</datalist>
-        </FormRow>
-        <FormRow label="Teil"><TextInput inputMode="decimal" value={form.series_part} onChange={(e) => set("series_part", e.target.value)} placeholder="z. B. 1" data-testid="form-series-part" /></FormRow>
+        <SeriesPicker value={form.series_name} onChange={(v) => set("series_name", v)} suggestions={suggestions} title={form.title} />
+        <FormRow label="Teil"><TextInput inputMode="decimal" value={form.series_part} onChange={(e) => set("series_part", decimal(e.target.value))} placeholder="z. B. 1" data-testid="form-series-part" /></FormRow>
       </FormGroup>
     </>
   );

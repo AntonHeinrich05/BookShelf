@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Library } from "lucide-react";
+import { Eye, EyeOff, Library } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { errorMessage } from "@/lib/api";
 import { PillButton } from "@/components/ios/Form";
@@ -13,10 +13,13 @@ const COVERS = [
   "https://covers.openlibrary.org/b/id/10865329-L.jpg",
 ];
 
-const Field = ({ label, ...props }) => (
+const Field = ({ label, trailing, ...props }) => (
   <label className="block">
     <span className="mb-1.5 block text-xs font-bold uppercase tracking-[0.18em] text-fg3">{label}</span>
-    <input {...props} className="w-full rounded-xl bg-surface2 px-4 py-3 text-[16px] text-fg outline-none ring-tint/60 transition-shadow placeholder:text-fg3 focus:ring-2" />
+    <span className="flex items-center rounded-xl bg-surface2 ring-tint/60 transition-shadow focus-within:ring-2">
+      <input {...props} className="w-full bg-transparent px-4 py-3 text-[16px] text-fg outline-none placeholder:text-fg3" />
+      {trailing}
+    </span>
   </label>
 );
 
@@ -26,6 +29,7 @@ export default function LoginPage() {
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [busy, setBusy] = useState(false);
+  const [showPw, setShowPw] = useState(false);
 
   useEffect(() => {
     if (user) navigate("/", { replace: true });
@@ -80,7 +84,22 @@ export default function LoginPage() {
           </div>
           {mode === "register" && <Field label="Name" value={form.name} onChange={set("name")} placeholder="Lara" required data-testid="auth-name" />}
           <Field label="E-Mail" type="email" value={form.email} onChange={set("email")} placeholder="du@beispiel.de" required autoComplete="email" data-testid="auth-email" />
-          <Field label="Passwort" type="password" value={form.password} onChange={set("password")} placeholder="••••••••" required minLength={6} autoComplete={mode === "login" ? "current-password" : "new-password"} data-testid="auth-password" />
+          <Field
+            label="Passwort"
+            type={showPw ? "text" : "password"}
+            value={form.password}
+            onChange={set("password")}
+            placeholder="••••••••"
+            required
+            minLength={6}
+            autoComplete={mode === "login" ? "current-password" : "new-password"}
+            data-testid="auth-password"
+            trailing={
+              <button type="button" onClick={() => setShowPw((s) => !s)} className="grid h-11 w-11 shrink-0 place-items-center text-fg2 transition-colors hover:text-fg" aria-label={showPw ? "Passwort verbergen" : "Passwort anzeigen"} data-testid="toggle-password">
+                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            }
+          />
           <PillButton type="submit" disabled={busy} data-testid="auth-submit">{busy ? "Bitte warten…" : mode === "login" ? "Anmelden" : "Konto erstellen"}</PillButton>
           <div className="flex items-center gap-3 py-1 text-xs text-fg3"><span className="h-px flex-1 bg-line" />oder<span className="h-px flex-1 bg-line" /></div>
           <button type="button" onClick={googleLogin} className="flex w-full items-center justify-center gap-3 rounded-full border border-line bg-surface px-6 py-3.5 text-[16px] font-semibold transition-colors hover:bg-surface2 active:scale-[0.98]" data-testid="google-login-button">

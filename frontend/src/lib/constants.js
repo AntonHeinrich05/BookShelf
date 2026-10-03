@@ -26,7 +26,7 @@ export const STATUSES = [
 
 export const FORMATS = [
   { value: "audiobook", label: "Hörbuch", icon: Headphones },
-  { value: "ebook", label: "eBuch", icon: Tablet },
+  { value: "ebook", label: "eBook", icon: Tablet },
   { value: "hardcover", label: "Hardcover", icon: Book },
   { value: "paperback", label: "Taschenbuch", icon: BookText },
 ];
@@ -34,8 +34,19 @@ export const FORMATS = [
 export const OWNERSHIP = [
   { value: "borrowed", label: "Ausgeliehen", icon: Repeat },
   { value: "not_owned", label: "Nicht im Besitz", icon: Circle },
-  { value: "owned", label: "Besessen", icon: CircleCheck },
+  { value: "owned", label: "Im Besitz", icon: CircleCheck },
 ];
+
+export const digits = (v) => String(v ?? "").replace(/\D/g, "").replace(/^0+(?=\d)/, "");
+export const decimal = (v) => String(v ?? "").replace(",", ".").replace(/[^\d.]/g, "").replace(/^0+(?=\d)/, "");
+
+export const deriveSeries = (title = "") => {
+  const dash = title.match(/^(.+?)\s[-–:]\s(.+)$/);
+  if (dash) return dash[1].trim();
+  const paren = title.match(/\(([^)]+)\)/);
+  if (paren) return paren[1].replace(/\b(Band|Teil|Bd\.|Vol\.?)\s*\d+/i, "").trim();
+  return null;
+};
 
 export const TAXONOMY = {
   collections: { label: "Sammlungen", singular: "Sammlung", icon: Tag, param: "collection" },
