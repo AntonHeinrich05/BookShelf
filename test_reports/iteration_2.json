@@ -1,0 +1,47 @@
+{
+  "summary": "Executed targeted backend + frontend regression for CSV fidelity/import normalization, durable cover behavior, cache isolation, stats/header UI, and count regressions on preview environment.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Cross-user blocked book route",
+        "issue": "Directly opening another user's book shows loading splash for several seconds before 'Buch nicht gefunden.' appears (observed ~9s).",
+        "affected_selectors": [
+          "[data-testid='splash']",
+          "[data-testid='empty-state']"
+        ]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_targeted_update_semantics.py",
+    "/app/test_reports/pytest/iteration2_pytest_results.xml"
+  ],
+  "action_items": [
+    "Optional UX improvement: shorten retries/time-to-empty-state for 404 book detail route.",
+    "If required by scope, add explicit UI regression for percent-only timer session end flow (page-based slider was validated)."
+  ],
+  "critical_code_review_comments": [
+    "CSV export/import now correctly preserves rich list fields via JSON arrays, including comma/semicolon-containing values.",
+    "Importer normalization call pattern is efficient in tested run: load_books once and taxonomy_items four times for 160-row import.",
+    "Cover persistence and custom-cover overwrite guards behaved correctly in API-level tests and browser checks."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_targeted_update_semantics.py",
+    "/app/test_reports/iteration_2.json"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "92%"
+  },
+  "seed_data_creation": "Created isolated QA users/books via API during tests; test books were deleted where feasible. One temporary secondary account retained for UI isolation checks: cache-user2-1791060994@bookshelf.example.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Targeted suite passed: 8/8 in /app/backend/tests/test_targeted_update_semantics.py. Genuine cover checks validated dimensions/bytes/ETag with /root fixtures. UI validated cover cache reuse (no new /api/covers request on back-navigation), logout cache clearing, desktop+mobile+tablet genuine-cover screenshots, stats period dropdown behavior, header subtitle hide/show on root scroll, and existing owned search result navigation to detail.",
+  "rca of the issue": "Observed delayed empty-state for unauthorized/missing book detail likely due client query retry policy before settling to !book state. Repro: login second account -> open first-account /books/{id} -> splash persists several seconds before 'Buch nicht gefunden.'"
+}

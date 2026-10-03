@@ -1,0 +1,66 @@
+{
+  "summary": "Executed backend pytest regression (17 tests) and authenticated UI integration checks on preview URL. Backend mostly passed; one functional regression remains in series extraction. Core login/search/CRUD/stats/isolation flows worked in UI and API.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "/api/books (create, title parser path)",
+        "issue": "Series parsing trims explicit series label incorrectly: 'Titel (Meine Reihe, Band 2)' stored as series_name='Meine' instead of 'Meine Reihe'.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": [
+      {
+        "endpoint": "/api/auth/me",
+        "issue": "401 console entries appear before login during app bootstrap (expected unauthenticated pre-check, noisy but non-blocking)."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Google auth",
+        "issue": "Cannot complete Google sign-in in preview because GOOGLE_CLIENT_ID is not configured.",
+        "affected_selectors": [
+          "[data-testid='google-login-button']"
+        ]
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Stats chart render cycle",
+        "issues": [
+          "Intermittent Recharts width/height warning in console during layout transitions (no visible break in tested flow)."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Fix series parser so explicit labels like '(Meine Reihe, Band 2)' preserve full name.",
+    "Add/maintain /app/memory/test_credentials.md with active non-production test users (file currently empty).",
+    "Optionally reduce expected unauthenticated /auth/me console noise on first load.",
+    "After parser fix, rerun backend_test.py and quick UI add-book regression."
+  ],
+  "critical_code_review_comments": [
+    "Series extraction logic in sources.series_from_title over-strips names containing keyword 'Reihe'.",
+    "Auth test credential memory source is missing/empty, reducing repeatable auth QA safety.",
+    "Keep private cover path + ownership checks as implemented; backend ownership guard worked correctly in tests."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/iteration_1.json"
+  ],
+  "success_rate": {
+    "backend": "94%",
+    "frontend": "85%"
+  },
+  "seed_data_creation": "Created multiple TEST_* books and temporary users via API/UI; test books cleaned by fixture where applicable.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend regression suite is ready in /app/backend/tests/backend_test.py (uses dynamic account registration). Current single failing assertion is explicit series naming. UI screenshots captured for populated authenticated desktop/mobile in /app/test_reports/.",
+  "rca of the issue": "RCA: series_from_title removes trailing keyword patterns too aggressively after extracting parenthetical text. Repro: POST /api/books with title 'Titel (Meine Reihe, Band 2)'; response series_name becomes 'Meine'. Mitigation: preserve full phrase before part-token cleanup (remove only band/part tokens, not semantic word 'Reihe' in middle/end)."
+}
