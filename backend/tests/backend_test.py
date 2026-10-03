@@ -2,6 +2,7 @@
 import os
 import time
 import uuid
+from datetime import datetime, timezone, timedelta
 
 import pytest
 import requests
@@ -227,3 +228,61 @@ class TestSearch:
             assert "title" in item
             # cover_url can be None but key must exist
             assert "cover_url" in item
+
+    def test_search_cache_second_call_faster_identical(self, seed_headers):
+        q = f"Onyx Storm {uuid.uuid4().hex[:4]}"  # unique to avoid prior cache
+        t0 = time.time()
+        r1 = requests.get(f"{API}/search", headers=seed_headers, params={"q": q, "lang": "de"})
+        d1 = time.time() - t0
+        assert r1.status_code == 200
+        body1 = r1.json()
+        # Second call should be cached (if items were returned)
+        t0 = time.time()
+        r2 = requests.get(f"{API}/search", headers=seed_headers, params={"q": q, "lang": "de"})
+        d2 = time.time() - t0
+        assert r2.status_code == 200
+        body2 = r2.json()
+        assert body1 == body2  # identical
+        if body1.get("items"):
+            # cached response is almost always much faster
+            assert d2 <= d1 + 0.1, f"Expected cache faster: first={d1:.3f}s second={d2:.3f}s"
+
+    def test_search_onyx_storm_fast(self, seed_headers):
+        t0 = time.time()
+        r = requests.get(f"{API}/search", headers=seed_headers, params={"q": "Onyx Storm"})
+        elapsed = time.time() - t0
+        assert r.status_code == 200
+        assert elapsed < 15, f"Search too slow: {elapsed:.2f}s"
+
+
+# ---------- session longevity ----------
+class TestSession:
+    def test_session_expiry_is_about_one_year(self):
+        """After login, user_sessions.expires_at should be ~365 days ahead."""
+        from pymongo import MongoClient
+        mongo_url = os.environ.get("MONGO_URL")
+        db_name = os.environ.get("DB_NAME")
+        if not mongo_url or not db_name:
+            pytest.skip("MONGO_URL/DB_NAME not available in test env")
+        email = f"TEST_{uuid.uuid4().hex[:8]}@example.com"
+        r = requests.post(f"{API}/auth/register", json={"name": "SessionTest", "email": email, "password": "secret123"})
+        assert r.status_code == 200
+        token = r.json()["token"]
+        client = MongoClient(mongo_url)
+        session = client[db_name].user_sessions.find_one({"session_token": token})
+        assert session is not None
+        exp = session["expires_at"]
+        if isinstance(exp, str):
+            exp = datetime.fromisoformat(exp)
+        if exp.tzinfo is None:
+            exp = exp.replace(tzinfo=timezone.utc)
+        delta = exp - datetime.now(timezone.utc)
+        # Should be close to 365 days (allow +/- 2 days)
+        assert timedelta(days=363) < delta < timedelta(days=366), f"expires_at delta={delta}"
+        # /auth/me should work
+        r2 = requests.get(f"{API}/auth/me", headers={"Authorization": f"Bearer {token}"})
+        assert r2.status_code == 200
+        # Logout invalidates
+        requests.post(f"{API}/auth/logout", headers={"Authorization": f"Bearer {token}"})
+        r3 = requests.get(f"{API}/auth/me", headers={"Authorization": f"Bearer {token}"})
+        assert r3.status_code == 401

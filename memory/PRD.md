@@ -16,6 +16,7 @@ Laras Lese-Tracker: Bücher eintragen & Überblick behalten (Vorbild: iOS „Boo
 - PWA: manifest.json, apple-touch-icon, standalone meta; `render.yaml` Blueprint (API + Static Site)
 
 ## Implemented (2026-06)
+- Iteration 2: Sessions 365 Tage + sliding renewal (dauerhaft angemeldet), Passwort-Auge im Login, Labels „eBook“/„Im Besitz“, Datum→Status-Automatik im Formular, Zahlenfelder ohne führende 0, SeriesPicker (aus Titel abgeleitet + vorhandene Reihen durchsuchbar), Tag-Picker zeigen vorhandene Werte, Kalender neu (große Cover, Farbe pro Buch, Titel einmal, Haken am Ende, keine Legende), Suche: Mongo-Cache + Google/OpenLibrary parallel, Frontend-Cache persistiert (react-query persist), Render Keep-Alive (`KEEP_ALIVE_URL`) + README-Anleitung für Web Services / Static Site
 - Auth: Register/Login/Logout (bcrypt + Session-Token Cookie & Bearer), Google via Emergent Auth
 - Bibliothek: Status-Gruppen, Markiert, Autoren, Serien, Sammlungen, Kategorien, Orte (anlegbar), Formate, Besitz, „Aktuell am Lesen“ mit Fortschritt
 - Buch hinzufügen/bearbeiten (Bottom-Sheet, iOS-Gruppen): Details, Status, Format, Fortschrittstyp Seiten/%, Bewertung, Start/Ende, Besitz, Serie + Teil, Tags, Notizen

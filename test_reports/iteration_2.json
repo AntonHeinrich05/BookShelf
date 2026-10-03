@@ -1,0 +1,24 @@
+{
+  "summary": "Iteration 2 regression + new-feature testing for BookShelf PWA. Backend: expanded pytest suite to 19 tests (added 365-day session expiry verification querying MongoDB directly + search Mongo cache hit on identical call + Onyx Storm latency check). All 19 pass in ~5.3s against the public URL. Frontend: validated login password visibility toggle, library labels ('eBook' / 'Im Besitz' – no 'eBuch' / 'Besessen'), add-book drawer auto-status (end_date→finished, start_date→reading), numeric field normalization (initial '0', typing '12' yields '12', typing '0012' yields '12', focus-selects behaviour works), series picker (derived 'Dunbridge Academy' chip from 'Dunbridge Academy - Anyone' title, existing suggestion chips, click fills form-series), tag pickers for collections/places/categories present, PersistQueryClient (bs_token + bs_query_cache in localStorage, reload keeps user logged in and renders library instantly), and calendar June 2026 navigation (via calendar-prev from Oktober 2026), no legend footer, cover size ≈30x44 px, title+cover shown once per book, continuation weeks show colored line only, span click navigates to /books/{id}. No critical issues found.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "auth_utils.get_current_user implements sliding renewal correctly: renews when remaining < SESSION_DAYS-7 (358 days) i.e. after 7 days of inactivity threshold – effectively keeps active users logged in indefinitely.",
+    "search.search_books caches only non-empty results in Mongo search_cache (good: avoids caching 429/empty) and uses asyncio.gather(Google, OpenLibrary, return_exceptions=True) with graceful fallback.",
+    "No MongoDB _id leakage observed; all queries use projection {_id: 0}.",
+    "BookForm.set() auto-status logic matches spec exactly (end_date→finished unconditionally, start_date→reading only when end_date empty and current status ∈ {wishlist, to_read})."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (19/19)", "frontend": "100%"},
+  "test_credentials": "lara@test.de / lara1234 (seeded). Transient TEST_* users created and the session-test user is NOT deleted (its token is logged-out so session is invalidated; the user row remains – harmless, prefixed TEST_).",
+  "seed_data_creation": "No new seed books created in Lara's library this iteration. Only transient TEST_* users via API (one additional TEST_* user left from the session-expiry test).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend regression file /app/backend/tests/backend_test.py now also exercises Mongo directly (needs MONGO_URL + DB_NAME env vars) for the 365-day session assertion. For the frontend, system date is Oct 2026 → use 4× calendar-prev to reach June 2026. BookForm is a bottom-sheet (vaul Drawer); inputs may need scroll_into_view_if_needed before interaction. form-current-page/form-series-part use custom TextInput that strips leading zeros (`digits()`), hence '0012' becomes '12'. Password-visibility toggle: data-testid='toggle-password' on LoginPage. Native <select> elements must be driven with page.select_option.",
+  "rca of the issue": "N/A – no bugs found."
+}
