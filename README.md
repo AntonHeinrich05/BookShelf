@@ -47,12 +47,41 @@ cd frontend && yarn && yarn start
 ```
 `backend/.env`: `MONGO_URL`, `DB_NAME`, `CORS_ORIGINS` · `frontend/.env`: `REACT_APP_BACKEND_URL`
 
-## Deployment auf Render (Blueprint)
-1. Repo auf GitHub pushen (die `.env`-Dateien sind per `.gitignore` ausgeschlossen).
-2. MongoDB Atlas Cluster anlegen (Free Tier reicht) → Connection-String kopieren.
-3. Render → **New → Blueprint** → Repo wählen. `render.yaml` legt zwei Services an:
-   - `bookshelf-api` (Python Web Service): `MONGO_URL` = Atlas-String, `CORS_ORIGINS` = URL des Frontends (z. B. `https://bookshelf-web.onrender.com`)
-   - `bookshelf-web` (Static Site): `REACT_APP_BACKEND_URL` = URL der API (z. B. `https://bookshelf-api.onrender.com`, ohne Slash am Ende)
-4. Deploy. Danach auf dem iPhone in Safari öffnen → Teilen → „Zum Home-Bildschirm“.
+## Deployment auf Render (zwei Web Services, ohne Blueprint)
+
+Vorher: Repo auf GitHub pushen, MongoDB-Atlas-Cluster anlegen (Free Tier), unter *Database → Connect → Drivers* den Connection-String kopieren (Form: `mongodb+srv://USER:PASSWORT@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority`) und unter *Network Access* `0.0.0.0/0` erlauben.
+
+### 1. Backend – „New → Web Service“
+| Feld | Wert |
+|---|---|
+| Root Directory | `backend` |
+| Runtime | Python 3 |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `uvicorn server:app --host 0.0.0.0 --port $PORT` |
+| Health Check Path | `/api/health` |
+
+Environment Variables (Tab „Environment“):
+- `MONGO_URL` = dein Atlas-Connection-String  ← **hier kommt der Atlas-String rein**
+- `DB_NAME` = `bookshelf`
+- `CORS_ORIGINS` = URL des Frontends, z. B. `https://bookshelf-web.onrender.com` (ohne Slash am Ende)
+- `PYTHON_VERSION` = `3.11.9`
+
+### 2. Frontend – „New → Web Service“
+| Feld | Wert |
+|---|---|
+| Root Directory | `frontend` |
+| Runtime | Node |
+| Build Command | `yarn install && yarn build` |
+| Start Command | `yarn serve` |
+
+Environment Variables:
+- `REACT_APP_BACKEND_URL` = URL des Backends, z. B. `https://bookshelf-api.onrender.com` (ohne Slash am Ende)
+- `DISABLE_EMERGENT_OVERLAY` = `true`
+- `NODE_VERSION` = `20.18.0`
+
+Danach bei Bedarf `CORS_ORIGINS` im Backend auf die echte Frontend-URL setzen und beide Services neu deployen.
+Auf dem iPhone: Safari → Teilen → „Zum Home-Bildschirm“.
+
+Alternativ geht `render.yaml` als Blueprint (gleiche Werte).
 
 Der Google-Login funktioniert auf jeder Domain automatisch (Redirect auf `window.location.origin`).
