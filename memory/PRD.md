@@ -44,3 +44,7 @@ Iteration 4 (Juni 2026) – Wünsche des Users (alles in einem Durchgang):
 - P1: `GOOGLE_BOOKS_API_KEY` in Render setzen (bessere Google-Trefferquote/Beschreibungen)
 - P1: Mehrere Lesedurchgänge als eigene Protokolle; Reihen-Vorschläge im Formular aus DNB live
 - P2: Jahres-Leseziel, Lesestreak, Hörbuch-Timer, Service Worker Offline, Apple-Login
+
+## 2026-10-03 – Neue Rückmeldung des Users (noch offen, Details in README.md „Offene Verbesserungsliste“)
+Cover lokal/dauerhaft speichern · kaputtes DNB-Cover („?“) · eigenes Cover hochladen (bleibt dauerhaft) · Vollbild unten · Untertitel im Sticky-Header beim Scrollen ausblenden · Statistik-Zeitraum als Button mit Auswahl · Kreis-Dial lagt · weißer Kasten hinter Google-Button · Besitz gesetzt → Wunschliste → Zu Lesen · Listen zeigen nur 20 Bücher / Infinite Scroll.
+User-Anweisung: zuerst NUR README schreiben (erledigt), danach die Punkte umsetzen.
