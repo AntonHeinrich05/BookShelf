@@ -77,32 +77,79 @@
 html,
 body,
 #root {
-    height: 100%;
-    min-height: 100dvh;
     background-color: var(--c-canvas);
 }
 
-/* Vollbild-App-Verhalten: der Browser-Viewport scrollt nie selbst (verhindert das
-   "Verschieben" und den schwarzen Bereich nach dem Einklappen der iOS-Tastatur).
-   Gescrollt wird ausschließlich in #root. */
+/* A fixed body + 100dvh clips the standalone iOS viewport below the home area.
+   Keep the body in normal flow. Only #root scrolls; the overlay has the SAME height.
+   WebKit standalone needs lvh, not its status-bar-reduced dvh (WebKit #254868). */
+:root {
+    --app-height: 100vh;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --nav-bottom: max(8px, var(--safe-bottom));
+}
+@supports (height: 100dvh) { :root { --app-height: 100dvh; } }
+@media (display-mode: standalone), (display-mode: fullscreen) {
+    :root { --app-height: 100vh; }
+    @supports (height: 100lvh) { :root { --app-height: 100lvh; } }
+}
+html.is-standalone { --app-height: 100vh; }
+@supports (height: 100lvh) { html.is-standalone { --app-height: 100lvh; } }
 html {
     overflow: hidden;
-    height: 100dvh;
+    height: var(--app-height);
+    -webkit-text-size-adjust: 100%;
 }
 body {
-    position: fixed;
-    inset: 0;
+    position: relative;
+    height: var(--app-height);
+    min-height: 0;
     overflow: hidden;
     overscroll-behavior: none;
 }
 #root {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    width: 100%;
+    height: var(--app-height);
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
 }
+#app-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--app-height);
+    pointer-events: none;
+    z-index: 40;
+}
+.page-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding-top: max(2px, var(--safe-top));
+    background: var(--c-canvas);
+}
+.page-header::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 9px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, var(--c-canvas), transparent);
+}
+.page-header-row { display: flex; align-items: center; gap: 10px; height: 44px; }
+.page-header-title { font-size: 22px; line-height: 30px; letter-spacing: 0; }
+.page-subtitle { position: relative; padding-top: 1px; font-size: 12px; line-height: 18px; color: var(--c-fg2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.page-subtitle { padding-top: 5px; }
+.app-nav { position: absolute; bottom: var(--nav-bottom); }
+.app-timer-bar { position: absolute; bottom: calc(var(--nav-bottom) + 68px); }
 /* Tastatur-Höhe (visualViewport) – Sheets/Formulare schrumpfen mit statt zu springen */
 :root {
     --kb: 0px;
@@ -111,16 +158,17 @@ body {
     padding-bottom: var(--kb);
 }
 .h-sheet {
-    height: calc(100dvh - var(--kb) - 24px);
-    max-height: calc(100dvh - var(--kb) - 24px);
+    height: calc(var(--app-height) - var(--kb) - max(24px, var(--safe-top)));
+    max-height: calc(var(--app-height) - var(--kb) - max(24px, var(--safe-top)));
 }
 .pt-status {
     padding-top: max(0.375rem, env(safe-area-inset-top));
 }
 /* Platz unter dem Inhalt: nur so viel, dass die schwebende TabBar (+ Timer-Leiste) nichts verdeckt */
 .pb-tabbar {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 96px);
+    padding-bottom: calc(var(--nav-bottom) + 76px);
 }
+.has-timer .pb-tabbar { padding-bottom: calc(var(--nav-bottom) + 140px); }
 
 body {
     margin: 0;
@@ -236,6 +284,18 @@ input[type="range"] {
 .ring-dial.dragging circle { transition: none !important; }
 .google-signin { background: transparent; color-scheme: normal; overflow: hidden; border-radius: 9999px; }
 .google-signin iframe { display: block; }
+.login-page { min-height: var(--app-height); display: flex; flex-direction: column; }
+.login-brand { width: 100%; max-width: 432px; margin: 0 auto; padding: max(20px, var(--safe-top)) 24px 24px; }
+.login-form-section { display: flex; justify-content: center; padding: 0 24px max(24px, var(--safe-bottom)); }
+@media (min-width: 1024px) {
+    .login-page { display: grid; grid-template-columns: 1fr 1fr; }
+    .login-brand { max-width: none; padding-top: 36px; padding-bottom: 48px; }
+    .login-form-section { align-items: center; padding: 32px 56px; }
+}
+@media (max-width: 1023px) and (max-height: 680px) {
+    .login-brand { padding-top: max(10px, var(--safe-top)); padding-bottom: 16px; }
+    .login-form-section { padding-bottom: max(16px, var(--safe-bottom)); }
+}
 @media (prefers-reduced-motion: reduce) {
     .anim-in, .skeleton { animation: none; }
     *, *::before, *::after { scroll-behavior: auto !important; }

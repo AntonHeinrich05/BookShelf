@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 const FILTER_KEYS = ["status", "format", "ownership", "read", "author", "place", "category", "collection", "series", "rating"];
 
 function titleFor(f) {
+  if (f.series === NO_SERIES) return "Einzelne Bücher";
   if (f.status) return byValue(STATUSES, f.status)?.label;
   if (f.format) return byValue(FORMATS, f.format)?.label;
   if (f.ownership && !f.read) return byValue(OWNERSHIP, f.ownership)?.label;
@@ -75,7 +76,7 @@ export default function BookListPage() {
 
   const setParam = (key, value) => setParams((p) => { value ? p.set(key, value) : p.delete(key); return p; }, { replace: true });
   const changeView = (v) => { setView(v); localStorage.setItem("bs_view", v); };
-  const chips = LIST_CHIPS.filter((c) => !(filters.status && c.key === "read"));
+  const chips = LIST_CHIPS.filter((c) => !((filters.status || filters.series === NO_SERIES) && c.key === "read"));
 
   return (
     <>

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { format, isSameDay, isSameMonth } from "date-fns";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CoverFallback } from "@/components/books/Cover";
+import { Cover } from "@/components/books/Cover";
 
 // Nur Cover + Balken, kein Titel (der steht in der Liste darunter / im Buch selbst)
 const LANE_WITH_COVER = 44;
@@ -45,9 +45,8 @@ export function CalendarWeek({ week, month, segs, laneCount, today }) {
             }}
           >
             {seg.showLabel && (
-              <span className="absolute left-0 top-0 h-[36px] w-[24px] shrink-0 overflow-hidden rounded-[3px] shadow-[0_2px_6px_rgba(0,0,0,0.45)] [container-type:inline-size]">
-                {seg.book.cover_url ? <img src={seg.book.cover_url} alt="" className="h-full w-full object-cover" /> : <CoverFallback title={seg.book.title} className="p-[2px] text-[0px]" />}
-              </span>
+              <Cover src={seg.book.cover_url} title={seg.book.title} author={seg.book.authors?.[0]}
+                className="absolute left-0 top-0 h-[36px] w-[24px]" rounded="rounded-[3px]" />
             )}
             <div className="relative h-[6px] w-full overflow-visible">
               <div

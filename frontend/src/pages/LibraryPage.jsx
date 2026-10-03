@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BookMarked, Heart, Library, Plus, Sparkles, Star, Users } from "lucide-react";
-import { toast } from "sonner";
+import { BookMarked, Heart, Library, Plus, Star, Users } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useOverview, useStartEnrich } from "@/hooks/useBooks";
-import { errorMessage } from "@/lib/api";
+import { useOverview } from "@/hooks/useBooks";
 import { FORMATS, LIBRARY_STATUSES, NO_SERIES, OWNERSHIP, READ_FILTERS } from "@/lib/constants";
 import { IconButton, PageHeader } from "@/components/layout/PageHeader";
-import { JobProgress } from "@/components/layout/JobProgress";
 import { Group, Row } from "@/components/ios/Group";
 import { Splash } from "@/components/layout/Splash";
 import { BookForm } from "@/components/books/BookForm";
@@ -21,22 +18,11 @@ export default function LibraryPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [addKind, setAddKind] = useState(null);
   const [edit, setEdit] = useState(null);
-  const [jobId, setJobId] = useState(() => sessionStorage.getItem("bs_lib_job") || null);
   const deleteTaxonomy = useDeleteTaxonomyWithToast();
-  const enrich = useStartEnrich();
 
   const initials = user?.name?.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
   const taxonomyProps = { onRename: (kind, name) => setEdit({ kind, name }), onDelete: deleteTaxonomy };
 
-  const startEnrich = async (kind) => {
-    try {
-      const { job_id } = await enrich.mutateAsync(kind);
-      sessionStorage.setItem("bs_lib_job", job_id);
-      setJobId(job_id);
-    } catch (err) {
-      toast.error(errorMessage(err));
-    }
-  };
 
   return (
     <>
@@ -58,7 +44,6 @@ export default function LibraryPage() {
       ) : (
         <>
           {o.reading.length > 0 && <ReadingNow books={o.reading} />}
-          {jobId && <JobProgress jobId={jobId} compact className="mb-6" onDone={(job) => { sessionStorage.removeItem("bs_lib_job"); if (job.status === "error") toast.error(job.message || "Vorgang fehlgeschlagen"); else toast.success(job.kind === "series" ? `${job.series_found} Reihen erkannt` : "Bibliothek aktualisiert"); }} />}
 
           <Group title="Bibliothek" testId="group-library">
             <Row icon={Library} label="Alle Bücher" value={o.total} to="/books" testId="row-all-books" />
@@ -104,10 +89,6 @@ export default function LibraryPage() {
             ))}
           </Group>
 
-          <Group title="Reihen" testId="group-maintenance">
-            <Row icon={Sparkles} label="Reihen automatisch erkennen" value={enrich.isPending ? "Startet…" : o.series_none ? `${o.series_none} prüfen` : undefined} onClick={() => !enrich.isPending && startEnrich("series")} testId="row-detect-series" />
-          </Group>
-          <p className="px-1 text-center text-xs text-fg3">Tipp: Reihen, Genres, Sammlungen und Orte nach links wischen zum Umbenennen oder Löschen.</p>
         </>
       )}
 

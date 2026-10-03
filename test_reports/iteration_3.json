@@ -1,0 +1,67 @@
+{
+  "summary": "Executed backend regression + targeted standalone/cover tests and deep mobile UI validation on preview URL with seeded QA data. Most P0/P1 checks passed, with one reproducible mobile navigation regression after closing BookForm drawer.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/covers/{book_id} (first request for uncached auto covers)",
+        "issue": "202 timing path (~1.25s) was not deterministically reproduced in this run; existing behavior is code-reviewed and prior tests pass for saved cover 200/ETag and first-available parallel race unit test."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Bottom TabBar (portal overlay) after BookForm close",
+        "issue": "On mobile, tab click can fail right after opening+closing BookForm: click on [data-testid='tab-calendar'] keeps user on '/' (title stays 'Bibliothek'). Baseline tab click works before drawer interaction.",
+        "selector": "[data-testid='tab-calendar']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Google login first fold and SDK render",
+        "issue": "Google GIS script and official button iframe load correctly at scroll=0 on 375x667 and 390x844 (login + registration modes). Full OAuth completion was intentionally not triggered.",
+        "affected_selectors": [
+          "[data-testid='google-login-button']"
+        ]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/backend/tests/test_targeted_update_semantics.py",
+    "/app/backend/tests/test_iteration3_review_scope.py",
+    "/app/backend/tests/test_cover_parallel_behavior.py",
+    "/app/tests/ui_seed_iteration3.py",
+    "/app/test_reports/pytest/iteration3_pytest_results.xml",
+    "/app/test_reports/pytest/iteration3_scope_results.xml",
+    "/app/test_reports/pytest/iteration3_cover_parallel.xml"
+  ],
+  "action_items": [
+    "Fix tab-bar interaction race after BookForm drawer close (likely overlay/pointer-event/timing issue).",
+    "Re-validate /api/covers first uncached request 202 timing path with deterministic slow source harness if required by release criteria.",
+    "After fix, rerun mobile sequence: open drawer -> close -> tap calendar/stats/library tabs repeatedly."
+  ],
+  "critical_code_review_comments": [
+    "Viewport/full-height stack is correctly implemented: body relative (not fixed), #root is scroller, #app-overlay mirrors app height; measured unused bottom strip was 0px across tested sizes.",
+    "PageHeader behavior is stable: title stays 22px, row stays 44px, subtitle correctly scrolls under opaque header, and no blur/backdrop bleed observed.",
+    "Standalone grouping logic in backend matches requested semantics in tested cases: finished no-series and manual 'Lonely Books' included; genuine series, non-finished, and 'Band 2' title marker cases excluded."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration3_review_scope.py",
+    "/app/backend/tests/test_cover_parallel_behavior.py",
+    "/app/tests/ui_seed_iteration3.py",
+    "/app/test_reports/iteration_3.json"
+  ],
+  "success_rate": {
+    "backend": "98%",
+    "frontend": "82%"
+  },
+  "seed_data_creation": "Created preview QA seed set (marker TEST_UI3_f93053, 29 books incl. one uploaded JPEG fixture with current-month reading dates) via /app/tests/ui_seed_iteration3.py.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Use seeded marker TEST_UI3_f93053 for quick calendar/author cover checks. Verified calendar week and month-list cover images load as blob with naturalWidth>0 once intersected/scrolled into view; authors mini-covers also blob-backed. Repro for high bug: mobile 390x844 -> Library -> open add-book drawer -> close -> tap tab-calendar: path may remain '/'.",
+  "rca of the issue": "TabBar regression RCA (frontend): reproducible state-dependent interaction issue. Steps: login -> library -> click add-book-button -> close form -> click tab-calendar. Expected route '/calendar'; actual route stays '/'. Baseline tab click without drawer works, suggesting a post-drawer interaction race (overlay teardown, focus trap, or transient pointer-event interception)."
+}

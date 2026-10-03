@@ -9,12 +9,13 @@ from rapidfuzz import fuzz
 
 from auth_utils import get_current_user
 from database import db
-from cover_store import cover_path, prepare_cover
+from cover_store import cover_path, queue_cover
 from book_pagination import book_page
 from genres import canonical, detect_genre
 from models import EST_MINUTES_PER_PAGE, Book, BookCreate, BookUpdate, User, now_iso
 from routers.taxonomy import load_books, taxonomy_items
 from sources import series_from_title
+from standalone import is_read_standalone, read_standalone_filter
 
 router = APIRouter(prefix="/books", tags=["books"])
 
@@ -139,7 +140,7 @@ async def overview(user: User = Depends(get_current_user)):
         "categories": await taxonomy_items(user.user_id, "categories", library),
         "places": await taxonomy_items(user.user_id, "places", library),
         "series": await taxonomy_items(user.user_id, "series", library),
-        "series_none": sum(1 for b in library if not b.get("series_name")),
+        "series_none": sum(is_read_standalone(b) for b in library),
         "covers_missing": sum(1 for b in library if not b.get("cover_url")),
         "reading": [with_time(b) for b in reading],
     }
@@ -172,8 +173,9 @@ async def list_books(
     }.items():
         if value:
             query[key] = value
-    if series == "__none__":  # „Einzelne Bücher" – ohne Reihe
-        query["series_name"] = {"$in": [None, ""]}
+    if series == "__none__":
+        query.pop("series_name", None)
+        query.update(read_standalone_filter())
     if rating is not None:
         query["rating"] = rating
     if not status and scope == "library":
@@ -233,7 +235,7 @@ async def create_book(data: BookCreate, background_tasks: BackgroundTasks, user:
             payload["series_part"] = payload.get("series_part") if payload.get("series_part") is not None else part
     doc = await normalize({**payload, "id": str(uuid.uuid4()), "user_id": user.user_id, "created_at": now, "updated_at": now}, user.user_id, hint, ownership_changed=True)
     await db.books.insert_one({**doc})
-    background_tasks.add_task(prepare_cover, doc)
+    queue_cover(doc)
     return with_time(doc)
 
 
@@ -260,7 +262,7 @@ async def update_book(book_id: str, data: BookUpdate, background_tasks: Backgrou
     await db.books.update_one({"id": book_id, "user_id": user.user_id}, {"$set": updates})
     current = await get_owned_book(book_id, user.user_id)
     if "cover_url" in updates:
-        background_tasks.add_task(prepare_cover, current)
+        queue_cover(current)
     return with_time(current)
 
 

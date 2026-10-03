@@ -26,7 +26,7 @@ const persister = createSyncStoragePersister({ storage: window.localStorage, key
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7, buster: "v3", dehydrateOptions: { shouldDehydrateQuery: q => q.state.status === "success" && !["search", "job", "auth-config"].includes(q.queryKey[0]) } }}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7, buster: "v4", dehydrateOptions: { shouldDehydrateQuery: q => q.state.status === "success" && !["search", "job", "auth-config"].includes(q.queryKey[0]) } }}>
       <App />
     </PersistQueryClientProvider>
   </React.StrictMode>,

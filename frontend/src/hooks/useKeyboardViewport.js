@@ -10,11 +10,14 @@ export function useKeyboardViewport() {
   useEffect(() => {
     const vv = window.visualViewport;
     const root = document.documentElement;
+    const standalone = window.matchMedia("(display-mode: standalone)");
+    const setMode = () => root.classList.toggle("is-standalone", standalone.matches || !!window.navigator.standalone);
+    setMode();
+    standalone.addEventListener?.("change", setMode);
     const update = () => {
       if (!vv) return;
       const kb = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
       root.style.setProperty("--kb", `${kb < 60 ? 0 : kb}px`);
-      if (kb < 60) window.scrollTo(0, 0);
     };
     const onFocusIn = (e) => {
       const el = e.target;
@@ -38,6 +41,7 @@ export function useKeyboardViewport() {
       vv?.removeEventListener("scroll", update);
       document.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("focusout", onFocusOut);
+      standalone.removeEventListener?.("change", setMode);
     };
   }, []);
 }

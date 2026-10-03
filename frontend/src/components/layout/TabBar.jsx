@@ -11,9 +11,9 @@ const TABS = [
 export function TabBar() {
   const navigate = useNavigate();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pointer-events-none" data-testid="tab-bar">
+    <nav className="app-nav inset-x-0 z-40 flex justify-center px-3 pointer-events-none" data-testid="tab-bar">
       <div className="flex items-center gap-2 pointer-events-auto">
-        <div className="flex items-center gap-1 rounded-full border border-fg/10 bg-canvas/70 p-1.5 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]">
+        <div className="flex items-center gap-0.5 rounded-full border border-line bg-surface p-1 shadow-[0_4px_16px_rgba(0,0,0,0.2)]">
           {TABS.map(({ to, label, icon: Icon, id }) => (
             <NavLink
               key={to}
@@ -22,7 +22,7 @@ export function TabBar() {
               data-testid={id}
               className={({ isActive }) =>
                 cn(
-                  "flex min-w-[72px] flex-col items-center justify-center gap-0.5 rounded-full px-4 py-2 transition-colors duration-200 active:scale-95",
+                  "flex min-w-[68px] flex-col items-center justify-center gap-0.5 rounded-full px-3 py-2 transition-colors duration-200 active:scale-95",
                   isActive ? "bg-surface2 text-fg" : "text-fg2 hover:text-fg"
                 )
               }
@@ -36,7 +36,7 @@ export function TabBar() {
           type="button"
           data-testid="tab-search"
           onClick={() => navigate("/search")}
-          className="grid h-14 w-14 place-items-center rounded-full border border-fg/10 bg-canvas/70 text-fg backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-transform active:scale-95"
+          className="grid h-14 w-14 place-items-center rounded-full border border-line bg-surface text-fg shadow-[0_4px_16px_rgba(0,0,0,0.2)] transition-transform active:scale-95"
           aria-label="Entdecken"
         >
           <Search size={22} />

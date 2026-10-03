@@ -87,6 +87,7 @@ app.add_middleware(
     allow_origins=[o.strip() for o in os.environ["CORS_ORIGINS"].split(",") if o.strip() != "*"] + ([os.environ["APP_ORIGIN"]] if os.environ.get("APP_ORIGIN") else []),
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Cover-Revision", "ETag", "Retry-After"],
 )
 
 

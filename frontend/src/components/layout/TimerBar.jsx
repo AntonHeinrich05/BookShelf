@@ -11,7 +11,7 @@ export function TimerBar() {
   const { pathname } = useLocation();
   if (!timer || pathname.endsWith("/read")) return null;
   return (
-    <div className="fixed inset-x-0 bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+76px)] z-40 flex justify-center px-4" data-testid="timer-bar">
+    <div className="app-timer-bar inset-x-0 z-40 flex justify-center px-4 pointer-events-auto" data-testid="timer-bar">
       <button
         type="button"
         onClick={() => navigate(`/books/${timer.bookId}/read`)}

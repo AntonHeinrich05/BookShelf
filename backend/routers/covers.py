@@ -5,8 +5,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Response, UploadFile
 import httpx
 from bson import Binary
+from pymongo.errors import DuplicateKeyError
 from auth_utils import get_current_user
-from cover_store import MAX_UPLOAD, compress_image, download_image, ensure_cover, safe_url, store_cover
+from cover_store import MAX_UPLOAD, compress_image, download_image, queue_cover, saved_cover, safe_url, store_cover
 from database import db
 from models import User
 from routers.books import get_owned_book, with_time
@@ -27,7 +28,10 @@ async def cover_preview(url: str = Query(max_length=4096), user: User = Depends(
     if not data:
         async with preview_downloads, httpx.AsyncClient(timeout=5) as client:
             data = await download_image(client, url)
-        await db.cover_previews.update_one({"url_hash": key}, {"$set": {"data": Binary(data) if data else None, "created_at": datetime.now(timezone.utc)}}, upsert=True)
+        try:
+            await db.cover_previews.update_one({"url_hash": key}, {"$set" if data else "$setOnInsert": {"data": Binary(data) if data else None, "created_at": datetime.now(timezone.utc)}}, upsert=True)
+        except DuplicateKeyError:
+            pass
     if not data:
         raise HTTPException(404, "Kein Cover verfügbar", headers={"Cache-Control": "no-store"})
     return Response(data, media_type="image/jpeg", headers={"Cache-Control": "private, max-age=604800", "X-Content-Type-Options": "nosniff"})
@@ -36,12 +40,19 @@ async def cover_preview(url: str = Query(max_length=4096), user: User = Depends(
 @router.get("/covers/{book_id}")
 async def get_cover(book_id: str, request: Request, user: User = Depends(get_current_user)):
     book = await get_owned_book(book_id, user.user_id)
-    cover = await ensure_cover(book)
+    cover = await saved_cover(book)
+    if not cover:
+        task = queue_cover(book)
+        try:
+            cover = await asyncio.wait_for(asyncio.shield(task), timeout=1.25)
+        except asyncio.TimeoutError:
+            # Do not occupy an image request for 20–45 seconds. Other visible covers get a turn.
+            return Response(status_code=202, headers={"Retry-After": "2", "Cache-Control": "no-store"})
     if not cover:
         raise HTTPException(404, "Kein Cover verfügbar", headers={"Cache-Control": "no-store"})
     etag = f'"{cover["revision"]}"'
     headers = {"Cache-Control": "private, max-age=31536000, immutable" if request.query_params.get("v") == cover["revision"] else "private, max-age=3600",
-               "ETag": etag, "Vary": "Authorization, Cookie", "X-Content-Type-Options": "nosniff"}
+               "ETag": etag, "Vary": "Authorization, Cookie", "X-Cover-Revision": cover["revision"], "X-Content-Type-Options": "nosniff"}
     if request.headers.get("if-none-match") == etag:
         return Response(status_code=304, headers=headers)
     return Response(content=bytes(cover["data"]), media_type="image/jpeg", headers=headers)

@@ -1,3 +1,4 @@
+import { Cover } from "@/components/books/Cover";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight, Search } from "lucide-react";
@@ -34,7 +35,7 @@ export default function AuthorsPage() {
                 <p className="text-sm text-fg2">{a.total} {a.total === 1 ? "Buch" : "Bücher"} · {a.finished} gelesen{a.pages ? ` · ${a.pages.toLocaleString("de-DE")} Seiten` : ""}</p>
               </div>
               <div className="flex -space-x-2">
-                {a.covers.slice(0, 3).map((c) => <img key={c} src={c} alt="" className="h-9 w-6 rounded-[3px] object-cover ring-2 ring-surface" />)}
+                {a.covers.slice(0, 3).map((c) => <Cover key={c} src={c} title={a.name} className="h-9 w-6 ring-2 ring-surface" rounded="rounded-[3px]" />)}
               </div>
               <ChevronRight size={18} className="text-fg3" />
             </Link>
